@@ -1,0 +1,138 @@
+---
+version: '2.0'
+services:
+
+  lbc1:
+    image: pdns_dnsdist:latest
+    container_name: lbc1
+    restart: always
+    volumes:
+      - ./lbc1:/etc/dnsdist
+    ports:
+      - "1153:53"
+      - "1153:53/udp"
+      - "1180:80"
+
+  lbc2:
+    image: pdns_dnsdist:latest
+    container_name: lbc2
+    restart: always
+    volumes:
+      - ./lbc2:/etc/dnsdist
+    environment:
+      - DNSDIST_API_KEY
+    network_mode: host
+    
+  cache1:
+    image: pdns_recursor:latest
+    container_name: cache1
+    restart: always
+    volumes:
+      - ./cache1:/etc/powerdns
+    ports:
+      - "2153:53"
+      - "2153:53/udp"
+      - "2180:80"
+
+  cache2:
+    image: pdns_recursor:latest
+    container_name: cache2
+    restart: always
+    volumes:
+      - ./cache2:/etc/powerdns
+    environment:   
+      - PDNS_RECURSOR_API_KEY
+    ports:
+      - "2053:53"
+      - "2053:53/udp"
+      - "8082:8082"
+    
+  lbr1:
+    image: pdns_dnsdist:latest
+    container_name: lbr1
+    restart: always
+    volumes:
+      - ./lbr1:/etc/dnsdist
+    ports:
+      - "3153:53"
+      - "3153:53/udp"
+      - "3180:80"
+
+  lbr2:
+    image: pdns_dnsdist:latest
+    container_name: lbr2
+    restart: always
+    volumes:
+      - ./lbr2:/etc/dnsdist
+    environment:
+      - DNSDIST_API_KEY
+    network_mode: host
+
+  rec1:
+    image: pdns_recursor:latest
+    container_name: rec1
+    restart: always
+    volumes:
+      - ./rec1/:/etc/powerdns
+    ports:
+      - "4153:53"
+      - "4153:53/udp"
+      - "4180:80"
+
+  rec2:
+    image: pdns_recursor:latest
+    container_name: rec2
+    restart: always   
+    volumes:
+      - ./rec2:/etc/powerdns
+    environment:
+      - PDNS_RECURSOR_API_KEY
+    ports:
+      - "2053:53"
+      - "2053:53/udp"
+      - "8082:8082"
+    
+  root-slave:
+    image: pdns_auth:latest
+    container_name: root-slave
+    restart: always    
+    volumes:
+      - ./root-slave:/etc/powerdns/
+    ports:
+      - "5153:53"
+      - "5153:53/udp"
+      - "5181:80"
+
+  root-slave-db:
+    image: mariadb:10.6
+    container_name: root-slave-db
+    volumes:
+      - ./root-slave-db:/var/lib/mysql:z
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_USER=powerdns
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=powerdns      
+      
+  root-master:
+    image: pdns_auth:latest
+    container_name: root-master
+    restart: always
+    volumes:
+      - ./root-slave:/etc/powerdns/
+    ports:
+      - "5253:53"
+      - "5253:53/udp"
+      - "5281:80"
+
+  root-master-db:
+    image: mariadb:10.6
+    container_name: root-master-db
+    volumes:
+      - ./root-master-db:/var/lib/mysql:z
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+      - MYSQL_USER=powerdns
+      - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE=powerdns
+

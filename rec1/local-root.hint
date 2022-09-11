@@ -1,0 +1,7 @@
+.                    3600000      NS    A.ROOT-EXAMPLE.NET.
+A.ROOT-EXAMPLE.NET.      3600000      A     192.168.112.6
+
+.                    3600000      NS    B.ROOT-EXAMPLE.NET.
+B.ROOT-EXAMPLE.NET.      3600000      A     192.168.112.6
+
+
